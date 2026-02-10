@@ -1,9 +1,9 @@
-# from gevent import monkey
-# monkey.patch_all()
-
+import setproctitle
 from flask import Flask, render_template, send_from_directory
 from flask_socketio import SocketIO
 import os
+
+setproctitle.setproctitle("SysAudioDaemon")
 
 app = Flask(__name__)
 # 允许跨域，确保局域网访问无阻碍

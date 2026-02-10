@@ -1,5 +1,5 @@
+import setproctitle
 import os
-import time
 import subprocess
 import socketio
 from pynput import keyboard
@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 
 # 引入我们之前写好的 llm 模块
 from llm import analyze_image
+
+setproctitle.setproctitle("SysInputHelper")
 
 # 加载环境变量
 load_dotenv()
