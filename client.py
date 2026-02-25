@@ -15,7 +15,7 @@ setproctitle.setproctitle("SysInputHelper")
 load_dotenv()
 
 # 配置
-SERVER_URL = 'http://localhost:5050'
+SERVER_URL = 'http://127.0.0.1:5050'
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 RESOURCES_DIR = os.path.join(PROJECT_ROOT, "resources")
 
@@ -112,8 +112,10 @@ def on_release(key):
 
 print(f"🎹 监听中... 按 Cmd+Shift+P 截图，按 ESC 退出")
 
-# 首次启动尝试连接一次 server
-connect_to_server()
+# 在后台线程连接 server，不阻塞键盘监听的启动
+# （避免 Cisco VPN 环境下 IPv6 连接超时导致热键无响应）
+import threading
+threading.Thread(target=connect_to_server, daemon=True).start()
 
 with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
     listener.join()
