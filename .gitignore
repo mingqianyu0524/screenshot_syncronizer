@@ -4,3 +4,4 @@ venv/
 .env
 *.png
 check_models.py
+.claude/

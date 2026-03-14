@@ -1,3 +1,5 @@
+import socket
+
 import setproctitle
 from flask import Flask, render_template, send_from_directory
 from flask_socketio import SocketIO
@@ -41,7 +43,23 @@ def handle_broadcast(data):
     })
 
 
+def get_local_ip():
+    # 遍历所有 en* 接口，找到可用的局域网 IP（跳过 link-local 169.254.x.x）
+    import subprocess
+    for i in range(10):
+        try:
+            ip = subprocess.check_output(
+                ['ipconfig', 'getifaddr', f'en{i}'],
+                stderr=subprocess.DEVNULL
+            ).decode().strip()
+            if ip and not ip.startswith('169.254.'):
+                return ip
+        except subprocess.CalledProcessError:
+            continue
+    return '127.0.0.1'
+
+
 if __name__ == '__main__':
     # host='0.0.0.0' 极其重要，否则 iPhone 无法访问
-    print("🚀 Web Server 启动中... 请在 iPhone 上访问 http://你的MacIP:5050")
+    print(f"🚀 Web Server 启动中... 请在 iPhone 上访问 http://{get_local_ip()}:5050")
     socketio.run(app, host='0.0.0.0', port=5050, allow_unsafe_werkzeug=True)
