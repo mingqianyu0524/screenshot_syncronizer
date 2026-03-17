@@ -88,6 +88,16 @@
             document.getElementById('status').innerText = "🔴 连接断开";
         });
 
+        socket.on('client_status', function(data) {
+            if (data.ready) {
+                document.getElementById('status').innerText = "🎹 监听就绪，按 Cmd+Shift+P 截图";
+                // 仅在尚未有截图时才替换提示文案
+                if (document.getElementById('screenshot').style.display === 'none') {
+                    document.getElementById('answer-container').innerText = "Mac 截图监听已就绪 ✅\n按 Cmd+Shift+P 开始截图";
+                }
+            }
+        });
+
         socket.on('update_content', function(data) {
             console.log("收到新内容:", data);
 

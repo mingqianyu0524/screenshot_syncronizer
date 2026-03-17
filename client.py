@@ -31,6 +31,8 @@ def connect_to_server():
         try:
             sio.connect(SERVER_URL)
             print("✅ Client: 已连接到本地 Web Server")
+            # 通知所有浏览器：键盘监听已就绪
+            sio.emit('client_ready')
         except Exception as e:
             print(f"⚠️ Client Warning: 无法连接到 Server ({e})")
             print("   (请确保先运行了 server.py)")
@@ -110,11 +112,12 @@ def on_release(key):
         return False
 
 
+import threading
+
 print(f"🎹 监听中... 按 Cmd+Shift+P 截图，按 ESC 退出")
 
 # 在后台线程连接 server，不阻塞键盘监听的启动
 # （避免 Cisco VPN 环境下 IPv6 连接超时导致热键无响应）
-import threading
 threading.Thread(target=connect_to_server, daemon=True).start()
 
 with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:

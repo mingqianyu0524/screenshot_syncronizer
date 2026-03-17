@@ -2,7 +2,7 @@ import socket
 
 import setproctitle
 from flask import Flask, render_template, send_from_directory
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 import os
 
 setproctitle.setproctitle("SysAudioDaemon")
@@ -10,6 +10,9 @@ setproctitle.setproctitle("SysAudioDaemon")
 app = Flask(__name__)
 # 允许跨域，确保局域网访问无阻碍
 socketio = SocketIO(app, cors_allowed_origins="*")
+
+# 记录 client.py 的键盘监听是否已就绪
+client_is_ready = False
 
 # 路径配置
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -29,6 +32,22 @@ def index():
 @app.route('/images/<path:filename>')
 def serve_image(filename):
     return send_from_directory(RESOURCES_DIR, filename)
+
+
+# 新浏览器连入时，若 client 已就绪则补发状态（避免错过就绪通知）
+@socketio.on('connect')
+def handle_connect():
+    if client_is_ready:
+        emit('client_status', {'ready': True})
+
+
+# 接收 client.py 的就绪信号，广播给所有浏览器
+@socketio.on('client_ready')
+def handle_client_ready():
+    global client_is_ready
+    client_is_ready = True
+    print("✅ Server: Client 监听就绪，通知所有浏览器")
+    socketio.emit('client_status', {'ready': True})
 
 
 # 监听来自 client.py 的广播事件
